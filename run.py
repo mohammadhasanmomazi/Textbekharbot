@@ -19,7 +19,7 @@ def main():
     """Main entry point"""
     try:
         # Import and run the bot
-        from main import TextBekharBot
+        from bot import TextBekharBot
         
         # Check if bot token is provided
         bot_token = os.getenv('BOT_TOKEN')
