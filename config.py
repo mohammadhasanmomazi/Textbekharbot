@@ -3,7 +3,7 @@ from typing import Dict, List
 
 # Bot Configuration
 BOT_TOKEN = os.getenv('BOT_TOKEN', '8110388329:AAGOt7it4v07i1uJp8yBRcDdD3YVz7VH6dM')
-DATABASE_PATH = os.getenv('DATABASE_PATH', 'data.db')
+DATABASE_PATH = os.getenv('DATABASE_PATH', '/db/data.db')
 
 # User Roles
 class UserRole:
