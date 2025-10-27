@@ -2,8 +2,13 @@ import os
 from typing import Dict, List
 
 # Bot Configuration
-BOT_TOKEN = os.getenv('BOT_TOKEN', '8110388329:AAGOt7it4v07i1uJp8yBRcDdD3YVz7VH6dM')
-DATABASE_PATH = os.getenv('DATABASE_PATH', '/db/data.db')
+BOT_TOKEN = os.getenv('BOT_TOKEN', 'توکن‌ربات‌خودت')
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_PATH = os.path.join(BASE_DIR, 'db', 'data.db')
+
+# اطمینان از وجود پوشه db
+os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
 
 # User Roles
 class UserRole:

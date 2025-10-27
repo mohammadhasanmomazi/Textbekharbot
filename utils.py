@@ -107,7 +107,6 @@ class KeyboardManager:
             types.KeyboardButton("🔥 پر بازدید ترین ترک ها"),
             types.KeyboardButton("💰 پکیج اقتصادی")
         )
-        markup.row(types.KeyboardButton("👑 پکیج مگاهیت VIP"))
         
         # Services section
         markup.row(
@@ -141,70 +140,35 @@ class KeyboardManager:
     
     @staticmethod
     def get_admin_panel_keyboard() -> types.ReplyKeyboardMarkup:
-        """Get comprehensive admin panel keyboard"""
+        """Get simplified admin panel keyboard"""
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
-        
-        # Header
-        markup.row(types.KeyboardButton("🏠 صفحه اصلی"))
-        
+
         # User Management Section
         markup.row(types.KeyboardButton("👥 مدیریت کاربران"))
         markup.row(
             types.KeyboardButton("📋 لیست کاربران"),
             types.KeyboardButton("➕ افزودن ادمین")
         )
-        
-        # Content Management Section
-        markup.row(types.KeyboardButton("📁 مدیریت محتوا"))
-        
-        # Top Tracks Content
-        markup.row(types.KeyboardButton("🔥 پر بازدید ترین ترک ها"))
-        markup.row(
-            types.KeyboardButton("🎵 افزودن موزیک"),
-            types.KeyboardButton("📝 افزودن متن")
-        )
-        
-        # Economic Package Content
-        markup.row(types.KeyboardButton("💰 پکیج اقتصادی"))
-        markup.row(
-            types.KeyboardButton("🎵 افزودن موزیک"),
-            types.KeyboardButton("📝 افزودن متن")
-        )
-        
-        # VIP Package Content
-        markup.row(types.KeyboardButton("👑 پکیج مگاهیت VIP"))
-        markup.row(
-            types.KeyboardButton("🎵 افزودن موزیک"),
-            types.KeyboardButton("📝 افزودن متن")
-        )
-        
+
         # System Section
-        markup.row(types.KeyboardButton("⚙️ تنظیمات سیستم"))
-        markup.row(
-            types.KeyboardButton("📊 آمار کلی"),
-            types.KeyboardButton("🔧 ابزارها")
-        )
-        
-        # Navigation
-        markup.row(types.KeyboardButton("🔙 بازگشت"))
-        
+        markup.row(types.KeyboardButton("📊 آمار کلی"))
+
         return markup
     
     @staticmethod
     def get_user_panel_keyboard() -> types.ReplyKeyboardMarkup:
         """Get comprehensive user panel keyboard"""
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
-        
+
         # Header
         markup.row(types.KeyboardButton("🏠 صفحه اصلی"))
-        
+
         # Music Content Section
         markup.row(
             types.KeyboardButton("🔥 پر بازدید ترین ترک ها"),
             types.KeyboardButton("💰 پکیج اقتصادی")
         )
-        markup.row(types.KeyboardButton("👑 پکیج مگاهیت VIP"))
-        
+
         # User Services
         markup.row(
             types.KeyboardButton("📞 ارتباط با ما"),
@@ -214,13 +178,41 @@ class KeyboardManager:
             types.KeyboardButton("📋 راهنما"),
             types.KeyboardButton("⚙️ تنظیمات")
         )
-        
+
         # Account Section
         markup.row(
             types.KeyboardButton("👤 اطلاعات من"),
             types.KeyboardButton("📊 آمار من")
         )
-        
+
+        return markup
+
+    @staticmethod
+    def get_admin_user_panel_keyboard() -> types.ReplyKeyboardMarkup:
+        """Get user panel keyboard for admins (without music content)"""
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
+
+        # Header
+        markup.row(types.KeyboardButton("🏠 صفحه اصلی"))
+
+        # No Music Content Section for admins
+
+        # User Services
+        markup.row(
+            types.KeyboardButton("📞 ارتباط با ما"),
+            types.KeyboardButton("ℹ️ درباره ما")
+        )
+        markup.row(
+            types.KeyboardButton("📋 راهنما"),
+            types.KeyboardButton("⚙️ تنظیمات")
+        )
+
+        # Account Section
+        markup.row(
+            types.KeyboardButton("👤 اطلاعات من"),
+            types.KeyboardButton("📊 آمار من")
+        )
+
         return markup
     
     @staticmethod
@@ -237,15 +229,7 @@ class KeyboardManager:
             types.KeyboardButton("🔥 پر بازدید ترین ترک ها"),
             types.KeyboardButton("💰 پکیج اقتصادی")
         )
-        markup.row(types.KeyboardButton("👑 پکیج مگاهیت VIP"))
-        
-        # Content Actions
-        markup.row(types.KeyboardButton("➕ افزودن محتوا"))
-        markup.row(
-            types.KeyboardButton("🎵 افزودن موزیک"),
-            types.KeyboardButton("📝 افزودن متن")
-        )
-        
+
         # Content Management
         markup.row(types.KeyboardButton("📋 مدیریت محتوا"))
         markup.row(

@@ -1,3 +1,4 @@
+
 import logging
 import os
 from typing import Optional, Dict, Any, List
@@ -62,18 +63,17 @@ class TextBekharBot:
 
         # Main menu handlers - Professional layout
         self.bot.message_handler(
-            func=lambda m: m.text == "🏠 صفحه اصلی")(self.handle_home)
-        self.bot.message_handler(func=lambda m: m.text == "🔥 پر بازدید ترین ترک ها")(
+            func=lambda m: m.text.strip() == "🏠 صفحه اصلی" or m.text.strip() == "صفحه اصلی")(self.handle_home)
+        self.bot.message_handler(func=lambda m: m.text.strip() == "🔥 پر بازدید ترین ترک ها" or m.text.strip() == "پر بازدید ترین ترک ها")(
             self.handle_top_tracks)
-        self.bot.message_handler(func=lambda m: m.text == "💰 پکیج اقتصادی")(
+        self.bot.message_handler(func=lambda m: m.text.strip() == "💰 پکیج اقتصادی" or m.text.strip() == "پکیج اقتصادی")(
             self.handle_economic_package)
-        self.bot.message_handler(func=lambda m: m.text == "👑 پکیج مگاهیت VIP")(
-            self.handle_vip_package)
-        self.bot.message_handler(func=lambda m: m.text == "📞 ارتباط با ما")(
+        # Removed VIP package handler as per user request
+        self.bot.message_handler(func=lambda m: m.text.strip() == "📞 ارتباط با ما" or m.text.strip() == "ارتباط با ما")(
             self.handle_contact_us)
         self.bot.message_handler(
-            func=lambda m: m.text == "ℹ️ درباره ما")(self.handle_about_us)
-        self.bot.message_handler(func=lambda m: m.text == "👤 پنل کاربری")(
+            func=lambda m: m.text.strip() == "ℹ️ درباره ما" or m.text.strip() == "درباره ما")(self.handle_about_us)
+        self.bot.message_handler(func=lambda m: m.text.strip() == "👤 پنل کاربری" or m.text.strip() == "پنل کاربری")(
             self.handle_user_panel)
 
         # User panel handlers
@@ -106,22 +106,15 @@ class TextBekharBot:
         self.bot.message_handler(func=lambda m: m.text == "➕ افزودن ادمین")(
             self.handle_add_admin_prompt)
 
-        # Content Management handlers
-        self.bot.message_handler(func=lambda m: m.text == "📁 مدیریت محتوا")(
-            self.handle_content_management)
-        self.bot.message_handler(func=lambda m: m.text == "🎵 افزودن موزیک")(
-            self.handle_add_music_menu)
-        self.bot.message_handler(func=lambda m: m.text == "📝 افزودن متن")(
-            self.handle_add_text_menu)
 
-        # System Settings handlers
-        self.bot.message_handler(func=lambda m: m.text == "⚙️ تنظیمات سیستم")(
-            self.handle_system_settings)
-        self.bot.message_handler(func=lambda m: m.text == "🔧 ابزارها")(
-            self.handle_system_tools)
+
+        # Content Management handlers - Removed as per user request
+        # System Settings handlers - Removed as per user request
 
         # Content addition handlers
         self._setup_content_handlers()
+
+
 
         # File handlers
         self.bot.message_handler(content_types=[
@@ -170,30 +163,18 @@ class TextBekharBot:
 
     def _setup_content_handlers(self):
         """Setup content addition handlers for new professional layout"""
-        # Content addition handlers for the new menu structure
-        content_actions = [
-            # Top tracks content
-            ("افزودن موزیک به پر بازدید ترین ترک ها 🎵🔥",
-             ContentCategory.TOP_TRACKS, "music"),
-            ("افزودن متن به پر بازدید ترین ترک ها 📝🔥",
-             ContentCategory.TOP_TRACKS, "text"),
-            # Economic package content
-            ("افزودن موزیک به پکیج اقتصادی 🎵💰",
-             ContentCategory.ECONOMIC_PACKAGE, "music"),
-            ("افزودن متن به پکیج اقتصادی 📝💰",
-             ContentCategory.ECONOMIC_PACKAGE, "text"),
-            # VIP package content
-            ("افزودن موزیک به پکیج مگاهیت VIP 🎵👑",
-             ContentCategory.VIP_PACKAGE, "music"),
-            ("افزودن متن به پکیج مگاهیت VIP 📝👑",
-             ContentCategory.VIP_PACKAGE, "text"),
-        ]
+        # Content addition handlers for new menu structure - using named functions to avoid lambda issues
 
-        for button_text, category, content_type in content_actions:
-            def handler_func(
-                m, c=category, t=content_type): return self.handle_add_content(m, c, t)
-            self.bot.message_handler(
-                func=lambda m, text=button_text: m.text == text)(handler_func)
+        def handle_top_tracks_text(m):
+            self.handle_add_content(m, ContentCategory.TOP_TRACKS, "text")
+
+        def handle_economic_text(m):
+            self.handle_add_content(m, ContentCategory.ECONOMIC_PACKAGE, "text")
+
+        def handle_vip_text(m):
+            self.handle_add_content(m, ContentCategory.VIP_PACKAGE, "text")
+
+     
 
     def _is_registration_step(self, step: str):
         """Check if user is in specific registration step"""
@@ -213,7 +194,7 @@ class TextBekharBot:
     def _is_admin_adding_text(self, message):
         """Check if admin is adding text"""
         session = self.session_manager.get_admin_session(message.from_user.id)
-        return (session.get('admin_action') == 'add_text' and
+        return ((session.get('admin_action') == 'add_text' or session.get('admin_action') == 'add_music') and
                 session.get('step') == 'text' and
                 self.db.is_admin(message.from_user.id))
 
@@ -616,18 +597,7 @@ class TextBekharBot:
             reply_markup=self.keyboard_manager.get_admin_panel_keyboard()
         )
 
-    def handle_content_management(self, message):
-        """Handle content management request"""
-        if not self.db.is_admin(message.from_user.id):
-            self.bot.send_message(
-                message.chat.id, self.formatter.format_error_message("permission_denied"))
-            return
 
-        self.bot.send_message(
-            message.chat.id,
-            "📁 مدیریت محتوا\n\nلطفا دسته‌بندی مورد نظر را انتخاب کنید:",
-            reply_markup=self.keyboard_manager.get_content_management_keyboard()
-        )
 
     def handle_add_music_menu(self, message):
         """Handle add music menu request"""
@@ -692,9 +662,7 @@ class TextBekharBot:
         """Handle economic package request"""
         self._handle_content_request(message, ContentCategory.ECONOMIC_PACKAGE)
 
-    def handle_vip_package(self, message):
-        """Handle VIP package request"""
-        self._handle_content_request(message, ContentCategory.VIP_PACKAGE)
+
 
     def handle_contact_us(self, message):
         """Handle contact us request"""
@@ -747,10 +715,18 @@ class TextBekharBot:
 
     def handle_user_panel(self, message):
         """Handle user panel request"""
+        user_id = message.from_user.id
+        if self.db.is_admin(user_id):
+            # Use admin-specific user panel without music content
+            keyboard = self.keyboard_manager.get_admin_user_panel_keyboard()
+        else:
+            # Use regular user panel with music content
+            keyboard = self.keyboard_manager.get_user_panel_keyboard()
+
         self.bot.send_message(
             message.chat.id,
             "👤 پنل کاربری\n\nبه پنل کاربری خوش آمدید! لطفا گزینه مورد نظر را انتخاب کنید.",
-            reply_markup=self.keyboard_manager.get_user_panel_keyboard()
+            reply_markup=keyboard
         )
 
     def handle_user_info(self, message):
@@ -848,6 +824,15 @@ class TextBekharBot:
                 reply_markup=self.keyboard_manager.get_main_menu_keyboard()
             )
 
+    def handle_admin_top_tracks(self, message):
+        """Handle admin top tracks request"""
+        if not self.db.is_admin(message.from_user.id):
+            self.bot.send_message(
+                message.chat.id, self.formatter.format_error_message("permission_denied"))
+            return
+
+        self._handle_content_request(message, ContentCategory.TOP_TRACKS)
+
     def handle_list_users(self, message):
         """Handle list users request with professional interface"""
         if not self.db.is_admin(message.from_user.id):
@@ -901,6 +886,12 @@ class TextBekharBot:
             if not self.validator.validate_user_id(message.text):
                 self.bot.send_message(
                     message.chat.id, self.formatter.format_error_message("invalid_input"))
+                self.session_manager.clear_admin_session(user_id)
+                self.bot.send_message(
+                    message.chat.id,
+                    "لطفا از منوی ادمین استفاده کنید:",
+                    reply_markup=self.keyboard_manager.get_admin_choice_keyboard()
+                )
                 return
 
             admin_id = int(message.text)
@@ -915,6 +906,11 @@ class TextBekharBot:
                     f"لطفا ابتدا کاربر را با دستور /start ثبت نام کنید، سپس دوباره تلاش کنید."
                 )
                 self.session_manager.clear_admin_session(user_id)
+                self.bot.send_message(
+                    message.chat.id,
+                    "لطفا از منوی ادمین استفاده کنید:",
+                    reply_markup=self.keyboard_manager.get_admin_choice_keyboard()
+                )
                 return
 
             # Check if user is already an admin
@@ -925,6 +921,11 @@ class TextBekharBot:
                     f"⚠️ کاربر با شناسه {admin_id} قبلاً به عنوان {role_text} تعریف شده است."
                 )
                 self.session_manager.clear_admin_session(user_id)
+                self.bot.send_message(
+                    message.chat.id,
+                    "لطفا از منوی ادمین استفاده کنید:",
+                    reply_markup=self.keyboard_manager.get_admin_choice_keyboard()
+                )
                 return
 
             # Update user role to admin
@@ -937,9 +938,19 @@ class TextBekharBot:
                     f"✅ کاربر {user_name} (شناسه: {admin_id}) با موفقیت به عنوان ادمین اضافه شد.\n\n"
                     f"🛡️ این کاربر اکنون دسترسی کامل به پنل ادمین دارد."
                 )
+                self.bot.send_message(
+                    message.chat.id,
+                    "لطفا از منوی ادمین استفاده کنید:",
+                    reply_markup=self.keyboard_manager.get_admin_choice_keyboard()
+                )
             else:
                 self.bot.send_message(
                     message.chat.id, self.formatter.format_error_message())
+                self.bot.send_message(
+                    message.chat.id,
+                    "لطفا از منوی ادمین استفاده کنید:",
+                    reply_markup=self.keyboard_manager.get_admin_choice_keyboard()
+                )
 
             self.session_manager.clear_admin_session(user_id)
 
@@ -947,6 +958,12 @@ class TextBekharBot:
             logger.error(f"Error in handle_admin_id_input: {e}")
             self.bot.send_message(
                 message.chat.id, self.formatter.format_error_message())
+            self.session_manager.clear_admin_session(user_id)
+            self.bot.send_message(
+                message.chat.id,
+                "لطفا از منوی ادمین استفاده کنید:",
+                reply_markup=self.keyboard_manager.get_admin_choice_keyboard()
+            )
 
     def handle_add_content(self, message, category: str, content_type: str):
         """Handle add content request"""
@@ -955,15 +972,26 @@ class TextBekharBot:
                 message.chat.id, self.formatter.format_error_message("permission_denied"))
             return
 
-        self.session_manager.start_admin_action(
-            message.from_user.id, f'add_{content_type}', category)
-
+        # Set session data directly based on content type
         if content_type == 'music':
+            session_data = {
+                'admin_action': f'add_{content_type}',
+                'step': 'music',
+                'category': category
+            }
             self.bot.send_message(
                 message.chat.id, "لطفا فایل موزیک را ارسال کنید. 🎵")
         else:
+            session_data = {
+                'admin_action': f'add_{content_type}',
+                'step': 'text',
+                'category': category
+            }
             self.bot.send_message(
                 message.chat.id, "لطفا متن اولیه را وارد کنید. 📝")
+
+        # Save session directly
+        self.db.save_session(message.from_user.id, session_data)
 
     def handle_admin_music(self, message):
         """Handle admin music upload"""
@@ -986,15 +1014,29 @@ class TextBekharBot:
                     message.chat.id, "لطفا فایل موزیک ارسال کنید.")
                 return
 
-            # Update session
+            # Save music content to database
+            success = self.db.add_content(
+                category_name=session.get('category', ''),
+                content_type='music',
+                content='',
+                file_id=file_id,
+                file_size=file_size,
+                created_by=user_id
+            )
+
+            if not success:
+                self.bot.send_message(
+                    message.chat.id, self.formatter.format_error_message("database_error"))
+                self.session_manager.clear_admin_session(user_id)
+                return
+
+            # Update session for text input
             self.session_manager.update_admin_session(user_id, {
-                'file_id': file_id,
-                'file_size': file_size,
                 'step': 'text'
             })
 
             self.bot.send_message(
-                message.chat.id, "موزیک دریافت شد. حالا لطفا متن اولیه را وارد کنید. 📝")
+                message.chat.id, "موزیک دریافت و ذخیره شد. حالا لطفا متن اولیه را وارد کنید. 📝")
 
         except Exception as e:
             logger.error(f"Error in handle_admin_music: {e}")
@@ -1010,11 +1052,15 @@ class TextBekharBot:
             if not session:
                 return
 
+            logger.info(f"Admin text input processing started - User ID: {user_id}, Session: {session}")
+
             text = self.validator.sanitize_text(message.text)
 
             if not self.validator.validate_content_text(text):
+                logger.warning(f"Admin text validation failed - User ID: {user_id}, Text length: {len(text)}")
                 self.bot.send_message(
                     message.chat.id, self.formatter.format_error_message("invalid_input"))
+                # Do not clear session on validation failure - allow retry
                 return
 
             # Add content to database
@@ -1028,9 +1074,11 @@ class TextBekharBot:
             )
 
             if success:
+                logger.info(f"Admin content added successfully - User ID: {user_id}, Category: {session.get('category')}, Content Type: {session.get('admin_action').replace('add_', '')}")
                 self.bot.send_message(
                     message.chat.id, self.formatter.format_success_message("content_added"))
             else:
+                logger.error(f"Admin content addition failed - User ID: {user_id}, Category: {session.get('category')}, Content Type: {session.get('admin_action').replace('add_', '')}")
                 self.bot.send_message(
                     message.chat.id, self.formatter.format_error_message("database_error"))
 
@@ -1043,8 +1091,24 @@ class TextBekharBot:
 
     def handle_default(self, message):
         """Handle default messages"""
-        self.bot.reply_to(
-            message, "لطفا از دستور /start استفاده کنید تا ثبت نام کنید. 🤖")
+        user_id = message.from_user.id
+        user = self.db.get_user(user_id)
+        if user:
+            if self.db.is_admin(user_id):
+                keyboard = self.keyboard_manager.get_admin_choice_keyboard()
+            else:
+                keyboard = self.keyboard_manager.get_main_menu_keyboard()
+            self.bot.send_message(
+                message.chat.id,
+                "پیام شما شناسایی نشد. لطفا از منوی زیر استفاده کنید.",
+                reply_markup=keyboard
+            )
+        else:
+            self.bot.send_message(
+                message.chat.id,
+                Messages.WELCOME,
+                reply_markup=self.keyboard_manager.get_main_menu_keyboard()
+            )
 
     # Callback handlers for user management
     def handle_user_list_callback(self, call):
